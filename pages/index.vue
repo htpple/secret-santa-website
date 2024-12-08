@@ -169,7 +169,7 @@ const iDontWantTags = ref([]);
 const config = useRuntimeConfig();
 
 useHead({
-  title: "Тайный Санта!",
+  title: "Участвуй в Тайном Санте!",
 });
 
 //for inputs
