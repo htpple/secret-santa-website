@@ -168,6 +168,10 @@ const iWantTags = ref([]);
 const iDontWantTags = ref([]);
 const config = useRuntimeConfig();
 
+useHead({
+  title: "Тайный Санта!",
+});
+
 //for inputs
 const disabled = ref(false);
 const errorMessage = ref("");
