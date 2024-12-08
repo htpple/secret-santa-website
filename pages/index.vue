@@ -137,18 +137,23 @@
               class="button"
               type="submit"
               @click.prevent="submitForm"
-              :disabled="disableButton || disabled"
+              :disabled="disableButton || disabled || successResponse"
             >
-              <Transition name="slide-fade">
-                <span v-if="!disableButton">🎁</span></Transition
-              >
+              <Transition name="slide-fade"> <span>🎁</span></Transition>
               Отправить!<Transition name="slide-fade">
-                <span v-if="!disableButton">🎁</span></Transition
+                <span>🎁</span></Transition
               >
             </button>
-            <span class="send__button-notify" v-if="validateWishLists"
+            <span
+              class="send__button-notify"
+              v-if="validateWishLists && !successResponse"
               >Не забудь указать свои пожелания!</span
             >
+            <Transition name="slide-fade">
+              <span class="send__button-notify" v-if="successResponse"
+                >Поздравляем! Ты участвуешь в Тайном Санте 🎅</span
+              >
+            </Transition>
           </div>
         </form>
       </div>
@@ -167,6 +172,8 @@ const config = useRuntimeConfig();
 const disabled = ref(false);
 const errorMessage = ref("");
 const copyLinkSuccess = ref(false);
+
+const successResponse = ref(false);
 
 const copyLink = async () => {
   try {
@@ -200,10 +207,15 @@ const postData = computed(() => {
 
 const validateEmail = computed(() => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(email.value);
+  return emailPattern.test(email.value) && !disabled.value;
 });
 const validateWishLists = computed(() => {
-  return iDontWantTags.value.length === 0 && iWantTags.value.length === 0;
+  return (
+    iDontWantTags.value.length === 0 &&
+    iWantTags.value.length === 0 &&
+    fullname.value.length > 0 &&
+    validateEmail.value
+  );
 });
 const disableButton = computed(() => {
   return !validateEmail.value || fullname.value.length === 0;
@@ -224,6 +236,13 @@ function warnDisabled(errorStatus) {
   }, 4000);
 }
 
+function warnSuccess() {
+  successResponse.value = true;
+
+  setTimeout(() => {
+    successResponse.value = false;
+  }, 4000);
+}
 const submitForm = async () => {
   try {
     const data = await $fetch("/api/users", {
@@ -231,7 +250,8 @@ const submitForm = async () => {
       baseURL: config.public.apiBase,
       body: postData.value,
     });
-    console.log(data);
+
+    warnSuccess();
   } catch (e) {
     warnDisabled(e.status);
   }
